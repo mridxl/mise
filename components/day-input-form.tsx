@@ -7,7 +7,7 @@ import {
   Sparkle,
   X,
 } from "@phosphor-icons/react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import type { DayInput, EnergyLevel, MealSlot } from "@/lib/types";
 import {
   DEFAULT_INPUT,

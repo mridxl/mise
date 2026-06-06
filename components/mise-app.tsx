@@ -2,7 +2,7 @@
 
 import { ListChecks } from "@phosphor-icons/react";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { DayInputForm } from "@/components/day-input-form";
 import { GeneratingState } from "@/components/generating-state";
 import { PlanResults } from "@/components/plan-results";
@@ -17,25 +17,25 @@ import { formatMoney } from "@/lib/budget";
 import type { AppPhase, DayInput, DayPlan } from "@/lib/types";
 import { DEFAULT_INPUT, ENERGY_LABELS, MEAL_LABELS } from "@/lib/types";
 
+function getInitialInput(): DayInput {
+  return loadSavedInput() ?? DEFAULT_INPUT;
+}
+
+function getInitialPlan(): DayPlan | null {
+  return loadSavedPlan();
+}
+
+function getInitialPhase(): AppPhase {
+  return loadSavedPlan() ? "result" : "input";
+}
+
 export function MiseApp() {
-  const [phase, setPhase] = useState<AppPhase>("input");
-  const [input, setInput] = useState<DayInput>(DEFAULT_INPUT);
-  const [plan, setPlan] = useState<DayPlan | null>(null);
+  const [phase, setPhase] = useState<AppPhase>(getInitialPhase);
+  const [input, setInput] = useState<DayInput>(getInitialInput);
+  const [plan, setPlan] = useState<DayPlan | null>(getInitialPlan);
   const [error, setError] = useState<string | null>(null);
   const [modelUsed, setModelUsed] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
   const [editing, setEditing] = useState(false);
-
-  useEffect(() => {
-    const savedInput = loadSavedInput();
-    const savedPlan = loadSavedPlan();
-    if (savedInput) setInput(savedInput);
-    if (savedPlan) {
-      setPlan(savedPlan);
-      setPhase("result");
-    }
-    setHydrated(true);
-  }, []);
 
   const generatePlan = useCallback(
     async (payload: DayInput) => {
@@ -85,14 +85,6 @@ export function MiseApp() {
 
   const showForm = phase === "input" || (phase === "result" && editing);
   const showSummary = phase === "result" && !editing;
-
-  if (!hydrated) {
-    return (
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <div className="skeleton h-8 w-32 rounded" />
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 lg:py-10">
